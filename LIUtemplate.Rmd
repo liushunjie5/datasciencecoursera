@@ -1,0 +1,85 @@
+---
+title: "Exploring the BRFSS data"
+output: 
+  html_document: 
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+---
+
+## Setup
+
+### Load packages
+
+```{r load-packages, message = FALSE}
+library(ggplot2)
+library(dplyr)
+```
+
+
+
+```{r load-data}
+load("brfss2013.RData")
+```
+
+
+
+* * *
+
+## Part 1: Data
+
+
+* * *
+
+## Part 2: Research questions
+
+**Research quesion 1:**
+Q:For the general population in the US, is there a correlation between the amount of smoking and general health?
+
+A: Of course, we can easily see from the bar graph that those who smoke every day express a higher proportion of the moderate level of health condition, and a lower proportion of "Excellent" and "Very Good" health conditions compared with those who smoke less frequently and those who never smoke. The differences exist in both sexes. It is a cliche that smoking is always detrimental to our body.
+
+**Research quesion 2:**
+Q:For the general population in the US,is there a correlation between the amount of sleep and the person’s general health?
+
+A:Definitely! It is obvious that there is a significantly positive relationship between sleep time and health conditions. The more time they spent in sleep, they were more healthy, no matter they were males or females. Sleep longer can make them feel more healthy during the daytime.
+
+
+**Research quesion 3:**
+Q: For the general population in the US, is there a relationship between physical activity and income level?
+
+A: Yes, there may be a positive relationship between physical activities and income level. We found that those who took regular exercise expressed a higher proportion of high-earners compared with those who did not exercise. The underlying reason may be that the rich are more likely to afford to purchase sports equipment or have more leisure time to do exercise (perhaps they do not need to work for a long period of time, right?).
+
+* * *
+
+
+**Research quesion 1:**
+
+```{r}
+Q1 <- subset(brfss2013, select = c(sex, smokday2, genhlth))
+Q1T <- na.omit(Q1)
+Q1P <- Q1T %>% group_by(sex, smokday2, genhlth) %>% summarize(number = n()) %>% mutate(proportion = number / sum(number))
+ggplot(Q1P, aes(x = factor(smokday2), y = proportion * 100, fill = factor(genhlth))) + geom_bar(stat="identity", width = 0.2) + labs(x = "Frequency", y = "Proportion %", fill = "General Health")  + facet_grid(. ~  sex) + theme(axis.text.x = element_text(angle=90, hjust=1, vjust=1))
+```
+
+
+
+**Research quesion 2:**
+
+```{r}
+ Q2 <- subset(brfss2013, select = c(sex, sleptim1, genhlth))
+Q2T <- na.omit(Q2)
+Q2H <- Q2T %>% group_by(sex, genhlth) %>% summarize(meansleep = mean(sleptim1))
+ggplot(Q2H, aes(x = factor(genhlth), y = meansleep)) + geom_bar(stat = "identity", aes(x = factor(genhlth), y = meansleep), col = c("red", "blue", "green", "yellow", "purple", "red", "blue", "green", "yellow", "purple")) + labs(x = "Health Condition", y = "Average Sleep time (hour)")  + facet_grid(. ~  sex) + theme(axis.text.x = element_text(angle=90, hjust=1, vjust=1))
+```
+
+
+
+**Research quesion 3:**
+
+```{r}
+Q3 <- subset(brfss2013, select = c(sex, exerany2, income2))
+Q3T <- na.omit(Q3)
+Q3P <- Q3T %>% group_by(sex, exerany2, income2) %>% summarize(number = n()) %>% mutate(proportion = number / sum(number))
+ggplot(Q3P, aes(x = factor(exerany2), y = proportion * 100, fill = factor(income2))) + geom_bar(stat="identity", width = 0.5) + labs(x = "Physical", y = "Proportion %", fill = "Income Level")  + facet_grid(. ~  sex) + theme(axis.text.x = element_text(angle=90, hjust=1, vjust=1))
+```
+
